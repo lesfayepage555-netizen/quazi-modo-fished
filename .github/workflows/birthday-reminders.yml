@@ -1,0 +1,31 @@
+name: Birthday Reminders
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # Daily at 8 AM UTC
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  send-birthday-emails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run birthday reminder script
+        run: python3 fetch_birthdays.py
+        env:
+          YALIES_API_KEY: ${{ secrets.YALIES_API_KEY }}
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+
+      - name: Upload birthday emails file
+        uses: actions/upload-artifact@v3
+        with:
+          name: birthday-emails
+          path: emails-*.txt
+          retention-days: 7
